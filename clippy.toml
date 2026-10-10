@@ -1,0 +1,12 @@
+# Complexity thresholds for clippy's restriction-group size/complexity
+# lints. These keys only take effect for lints that are actually enabled —
+# see the [lints.clippy] table this repo's Cargo.toml needs (swe-repo's
+# `init`/`fix` appends one automatically if missing).
+#
+# clippy::cognitive_complexity exists but clippy's own docs now steer away
+# from it ("we used to think it measured how hard a method is to
+# understand... that's not what this lint does") in favor of the two
+# thresholds below — not configured here on purpose.
+too-many-lines-threshold = 100
+too-many-arguments-threshold = 7
+type-complexity-threshold = 250

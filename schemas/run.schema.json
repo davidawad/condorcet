@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assaymark.invalid/schemas/run/v1.json",
+  "title": "assaymark composition run v1 (run record)",
+  "description": "The append-only, content-addressed record of one profile applied to one bundle. id = run:s256:<hex of the canonical JSON of this record without id and created_at>. memo_key = hash(bundle, profile, composer versions, seed), so an identical re-run is a lookup.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "bundle", "profile", "composers", "memo_key", "steps", "verdict"],
+  "properties": {
+    "schema": {"const": "assaymark/run/v1"},
+    "id": {"$ref": "#/$defs/runId"},
+    "bundle": {"$ref": "#/$defs/bundleId"},
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {"id": {"type": "string"}, "version": {"type": "string"}, "revision": {"type": "string"}}
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {"name": {"type": "string"}, "version": {"type": "string"}}
+    },
+    "composers": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*@[0-9]+$"},
+      "description": "Every composer@version that ran, in step order."
+    },
+    "seed": {"type": "integer", "minimum": 0},
+    "memo_key": {"$ref": "#/$defs/hash"},
+    "created_at": {"type": "string", "format": "date-time", "description": "Excluded from the content hash."},
+    "steps": {"type": "array", "items": {"$ref": "#/$defs/step"}},
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "passed"],
+        "properties": {"id": {"type": "string"}, "passed": {"type": "boolean"}, "detail": {"type": "string"}}
+      }
+    },
+    "verdict": {"enum": ["pass", "fail", "inconclusive"]}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^s256:[0-9a-f]{64}$"},
+    "runId": {"type": "string", "pattern": "^run:s256:[0-9a-f]{64}$"},
+    "bundleId": {"type": "string", "pattern": "^bundle:s256:[0-9a-f]{64}$"},
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["composer", "status"],
+      "properties": {
+        "composer": {"type": "string", "pattern": "^[a-z][a-z0-9-]*@[0-9]+$"},
+        "role": {"enum": ["gate", "baseline"]},
+        "status": {"enum": ["ok", "failed", "skipped", "budget_exceeded"]},
+        "params": {"type": "object"},
+        "outputs": {
+          "type": "object",
+          "description": "Keyed by the composer's declared output names. Values are per-claim maps, scalars, or sets, as the composer declares.",
+          "additionalProperties": true
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Why the outputs are what they are: unsat cores, drop sets, extensions, circuits, seeds.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind"],
+            "properties": {
+              "kind": {"enum": ["unsat_core", "drop_set", "extension", "circuit", "model", "seed", "note"]},
+              "ids": {"type": "array", "items": {"type": "string"}},
+              "data": {}
+            }
+          }
+        },
+        "elapsed_ms": {"type": "integer", "minimum": 0, "description": "Excluded from the content hash."},
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {"code": {"type": "string"}, "message": {"type": "string"}, "next": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

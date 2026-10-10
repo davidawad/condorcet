@@ -1,0 +1,97 @@
+{
+  "schema": "assaymark/run/v1",
+  "id": "run:s256:503943de84822e89db7f849695609fc53a3f135f86a7d5cc828fe57570573b42",
+  "bundle": "bundle:s256:0908ee683e3d94af1196e3663c88ca8b9b085469bf0a32f6c8ffe65fb49137a2",
+  "adapter": {
+    "id": "org",
+    "version": "0.1",
+    "revision": "git:ab12cd34"
+  },
+  "profile": {
+    "name": "gate-strict",
+    "version": "1"
+  },
+  "composers": [
+    "sat-core@1",
+    "wmc-exact@1",
+    "logodds-clusters@1"
+  ],
+  "seed": 0,
+  "memo_key": "s256:0b80bec7bf1b2d5121f91c0b04473a732e23183f3a4d423a28df267fd60a8354",
+  "steps": [
+    {
+      "composer": "sat-core@1",
+      "role": "gate",
+      "status": "ok",
+      "outputs": {
+        "satisfiable": true
+      },
+      "evidence": [
+        {
+          "kind": "model",
+          "ids": [
+            "org:clx/fct-a1"
+          ],
+          "data": {
+            "true": [
+              "org:clx/fct-a1"
+            ],
+            "false": [
+              "org:clx/fct-b2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "composer": "wmc-exact@1",
+      "role": "gate",
+      "status": "ok",
+      "params": {
+        "encoding": "source-reliability"
+      },
+      "outputs": {
+        "marginal": {
+          "org:clx/fct-a1": 0.31,
+          "org:clx/fct-b2": 0.19,
+          "org:clx/def-clock": 0.5
+        },
+        "joint": {
+          "org:clx/fct-a1+org:clx/def-clock": 0.0
+        },
+        "partition": 1.0
+      },
+      "evidence": [
+        {
+          "kind": "note",
+          "data": "ILLUSTRATIVE values showing the record shape; not produced by an engine."
+        }
+      ],
+      "elapsed_ms": 3
+    },
+    {
+      "composer": "logodds-clusters@1",
+      "role": "baseline",
+      "status": "ok",
+      "outputs": {
+        "marginal": {
+          "org:clx/fct-a1": 0.95
+        }
+      },
+      "elapsed_ms": 1
+    }
+  ],
+  "gates": [
+    {
+      "id": "consistent",
+      "passed": true
+    },
+    {
+      "id": "joint-floor",
+      "passed": false,
+      "detail": "joint(load_bearing)=0.31 < 0.5"
+    }
+  ],
+  "verdict": "fail",
+  "created_at": "2026-10-10T00:00:00Z"
+}

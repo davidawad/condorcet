@@ -1,0 +1,44 @@
+{
+  "$schema": "https://assaymark.invalid/schemas/composer/v1.json",
+  "name": "wmc-exact",
+  "version": "1",
+  "family": "probabilistic",
+  "title": "Weighted model counting over a source-reliability encoding",
+  "reference": [{"cite": "Chavira & Darwiche 2008", "doi": "10.1016/j.artint.2007.11.002"}],
+  "inputs": {
+    "requires": ["claims", "links"],
+    "optional": ["constraints", "clusters"],
+    "weights": ["reliability", "llr"],
+    "link_kinds": ["support", "contradict", "undercut"]
+  },
+  "outputs": [
+    {"name": "marginal", "type": "probability", "per": "claim"},
+    {"name": "joint", "type": "probability", "per": "claim_set"},
+    {"name": "partition", "type": "number", "per": "bundle"}
+  ],
+  "assumptions": [
+    {"id": "binary-claims", "text": "Each claim is true or false; no degrees."},
+    {"id": "reliability-model", "text": "A link fires with probability r independently, except through declared clusters."},
+    {"id": "no-hidden-common-cause", "text": "Dependence not declared as a cluster is absent."}
+  ],
+  "cost": {
+    "class": "#P-hard",
+    "typical": "ms for tree-like bundles up to ~1000 variables",
+    "budget": {"max_vars": 3000, "timeout_ms": 30000},
+    "on_exceed": "fallback:wmc-sampled"
+  },
+  "exactness": "exact",
+  "deterministic": true,
+  "engine": {
+    "kind": "builtin",
+    "impl": "assaymark-wmc",
+    "alternates": [{"kind": "subprocess", "bin": "ganak", "license": "MIT"}]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "encoding": {"enum": ["source-reliability", "factor"]},
+      "base_rate": {"type": "number", "default": 0.5}
+    }
+  }
+}

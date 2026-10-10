@@ -1,0 +1,45 @@
+{
+  "schema": "assaymark/bundle/v1",
+  "adapter": {"id": "org", "version": "0.1", "revision": "git:ab12cd34"},
+  "scope": {"domain": "client-x/matter-1", "entities": ["p_123"], "question": null},
+  "claims": [
+    {"id": "org:clx/fct-a1", "text": "Defendant was at the dock", "prior": 0.5, "noticed": false, "about": ["p_123"]},
+    {"id": "org:clx/fct-b2", "text": "Defendant was in building 2", "prior": 0.5},
+    {"id": "org:clx/def-clock", "text": "The dock camera clock runs an hour fast", "prior": 0.5, "p_hint": 0.8}
+  ],
+  "exhibits": [
+    {
+      "id": "org:clx/ex-video",
+      "specimen": "item:s256:9f00000000000000000000000000000000000000000000000000000000000000",
+      "reading": {"claim": "org:clx/fct-a1", "purpose": "existence_of_event"},
+      "clusters": ["root:cam-vendor"]
+    }
+  ],
+  "links": [
+    {
+      "id": "link:org:clx/ex-video>org:clx/fct-a1",
+      "kind": "support",
+      "from": "org:clx/ex-video",
+      "to": "org:clx/fct-a1",
+      "weight": {"llr": 2.94},
+      "basis": "business_record lr_plus=19"
+    },
+    {
+      "id": "link:org:clx/def-clock>link:org:clx/ex-video>org:clx/fct-a1",
+      "kind": "undercut",
+      "from": "org:clx/def-clock",
+      "to": "link:org:clx/ex-video>org:clx/fct-a1",
+      "strength": 1.0
+    }
+  ],
+  "constraints": [
+    {
+      "id": "c1",
+      "kind": "excludes",
+      "claims": ["org:clx/fct-a1", "org:clx/fct-b2"],
+      "mode": "hard",
+      "basis": "one person, two buildings, same minute"
+    }
+  ],
+  "clusters": [{"key": "root:cam-vendor", "rho": 1.0, "basis": "provenance_root"}]
+}
