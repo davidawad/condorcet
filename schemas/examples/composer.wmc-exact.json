@@ -1,5 +1,5 @@
 {
-  "$schema": "https://assaymark.invalid/schemas/composer/v1.json",
+  "$schema": "https://condorcet.invalid/schemas/composer/v1.json",
   "name": "wmc-exact",
   "version": "1",
   "family": "probabilistic",
@@ -31,7 +31,7 @@
   "deterministic": true,
   "engine": {
     "kind": "builtin",
-    "impl": "assaymark-wmc",
+    "impl": "condorcet-wmc",
     "alternates": [{"kind": "subprocess", "bin": "ganak", "license": "MIT"}]
   },
   "params": {

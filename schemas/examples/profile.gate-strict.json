@@ -1,5 +1,5 @@
 {
-  "$schema": "https://assaymark.invalid/schemas/profile/v1.json",
+  "$schema": "https://condorcet.invalid/schemas/profile/v1.json",
   "name": "gate-strict",
   "version": "1",
   "steps": [

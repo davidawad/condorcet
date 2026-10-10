@@ -56,9 +56,9 @@ mod tests {
 
     #[test]
     fn err_shape() {
-        let v = serde_json::to_value(Envelope::err("E_NOPE", "nope", "assaymark status")).unwrap();
+        let v = serde_json::to_value(Envelope::err("E_NOPE", "nope", "condorcet status")).unwrap();
         assert_eq!(v["ok"], json!(false));
         assert_eq!(v["error"]["code"], json!("E_NOPE"));
-        assert_eq!(v["error"]["next"], json!("assaymark status"));
+        assert_eq!(v["error"]["next"], json!("condorcet status"));
     }
 }

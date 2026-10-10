@@ -1,5 +1,5 @@
 {
-  "schema": "assaymark/bundle/v1",
+  "schema": "condorcet/bundle/v1",
   "adapter": {"id": "org", "version": "0.1", "revision": "git:ab12cd34"},
   "scope": {"domain": "client-x/matter-1", "entities": ["p_123"], "question": null},
   "claims": [

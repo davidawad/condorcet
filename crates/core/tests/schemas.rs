@@ -2,7 +2,7 @@
 //! must validate against its schema, and the run example must cite the
 //! bundle example by its real content hash.
 
-use assaymark_core::{content_id, IdKind};
+use condorcet_core::{content_id, IdKind};
 use serde_json::Value;
 use std::path::PathBuf;
 

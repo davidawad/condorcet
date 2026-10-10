@@ -1,4 +1,4 @@
-# assaymark
+# condorcet
 
 A configurable engine for how true a body of information is. It takes a
 **bundle** (claims, the exhibits that bear on them, the support / contradict /
@@ -37,7 +37,7 @@ crates/core       ids, envelope (Bundle and run types arrive with the beads that
 crates/adapter    FactAdapter trait and adapter protocol (stub)
 crates/composer   Composer trait, spec loader, cascade runner (stub)
 crates/store      append-only run log, memo, bundle cache (stub)
-crates/cli        the `assaymark` binary (stub: `assaymark status`)
+crates/cli        the `condorcet` binary (stub: `condorcet status`)
 schemas/          bundle, composer, profile, run JSON schemas, plus examples/
 composers/        one directory per composer (empty so far)
 profiles/         one file per profile (empty so far)
@@ -56,10 +56,18 @@ cargo clippy --all-targets -- -D warnings
 ## Design
 
 The design lives in the author's dotfiles repository
-(`docs/architecture/fact-composition.md`); planned work is tracked in this
+(`docs/architecture/fact-composition.md`); the Condorcet jury composer note is
+`docs/design/condorcet-jury.md`; planned work is tracked in this
 repository's `.beads/` store.
 
 ## License
 
 Dual-licensed under MIT or Apache-2.0, at your option. See `LICENSE-MIT` and
 `LICENSE-APACHE`.
+
+## History
+
+This project was named `assaymark` until 2026-10-10. Existing bead ids keep
+the old `assaymark-` prefix, because `br` has no
+command to rewrite ids. New top-level issues use the `condorcet` prefix (config
+`issue_prefix`); children take their parent id.

@@ -1,7 +1,7 @@
 {
-  "schema": "assaymark/run/v1",
-  "id": "run:s256:503943de84822e89db7f849695609fc53a3f135f86a7d5cc828fe57570573b42",
-  "bundle": "bundle:s256:0908ee683e3d94af1196e3663c88ca8b9b085469bf0a32f6c8ffe65fb49137a2",
+  "schema": "condorcet/run/v1",
+  "id": "run:s256:3ff70a1e6c690519979f124fea53cee24a03a33b1797e6a5437d9260971d83ef",
+  "bundle": "bundle:s256:07ed2a61b34cbb7983d3ca61b63be1b406eab1d0bc69677a37f861205f14d539",
   "adapter": {
     "id": "org",
     "version": "0.1",

@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assaymark.invalid/schemas/bundle/v1.json",
-  "title": "assaymark Bundle v1 (fact-adapter interchange)",
+  "$id": "https://condorcet.invalid/schemas/bundle/v1.json",
+  "title": "condorcet Bundle v1 (fact-adapter interchange)",
   "description": "What a fact adapter hands the engine: claims, the exhibits that bear on them, weighted support/contradict/undercut links, declared constraints and independence clusters. Pure data. The engine commits to no domain: unknown fields are rejected so domain rules cannot leak across the seam.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "adapter", "claims", "links"],
   "properties": {
-    "schema": {"const": "assaymark/bundle/v1"},
+    "schema": {"const": "condorcet/bundle/v1"},
     "adapter": {
       "type": "object",
       "additionalProperties": false,

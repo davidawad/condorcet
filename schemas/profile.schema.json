@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assaymark.invalid/schemas/profile/v1.json",
-  "title": "assaymark profile v1",
+  "$id": "https://condorcet.invalid/schemas/profile/v1.json",
+  "title": "condorcet profile v1",
   "description": "An ordered cascade of composer steps (cheap first) plus gates over their outputs. A step with on_fail=stop ends the run with its verdict; role=baseline steps always run and are reported side by side, never gating.",
   "type": "object",
   "additionalProperties": false,

@@ -1,4 +1,4 @@
-# assaymark
+# condorcet
 
 Rust workspace for a fact-composition engine. See README.md for layout.
 
