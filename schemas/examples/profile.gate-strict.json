@@ -1,0 +1,17 @@
+{
+  "$schema": "https://assaymark.invalid/schemas/profile/v1.json",
+  "name": "gate-strict",
+  "version": "1",
+  "steps": [
+    {"composer": "sat-core@1", "on_fail": "stop"},
+    {"composer": "dung@1", "params": {"semantics": "grounded"}},
+    {"composer": "wmc-exact@1", "params": {"encoding": "source-reliability"}, "budget": {"timeout_ms": 20000}},
+    {"composer": "logodds-clusters@1", "role": "baseline"}
+  ],
+  "gates": [
+    {"id": "consistent", "rule": "sat-core.satisfiable == true"},
+    {"id": "not-defeated", "rule": "dung.label(staged) != 'out'"},
+    {"id": "joint-floor", "rule": "wmc-exact.joint(load_bearing) >= 0.5"}
+  ],
+  "seed": 0
+}

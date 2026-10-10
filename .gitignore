@@ -1,0 +1,4 @@
+/target
+.beads/*.db
+.beads/*.db-*
+.worktrees/

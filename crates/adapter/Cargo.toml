@@ -1,0 +1,13 @@
+[package]
+name = "assaymark-adapter"
+description = "assaymark adapter crate (stub)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+assaymark-core.workspace = true

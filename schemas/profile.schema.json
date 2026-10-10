@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assaymark.invalid/schemas/profile/v1.json",
+  "title": "assaymark profile v1",
+  "description": "An ordered cascade of composer steps (cheap first) plus gates over their outputs. A step with on_fail=stop ends the run with its verdict; role=baseline steps always run and are reported side by side, never gating.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "version", "steps"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "version": {"type": "string", "pattern": "^[0-9]+$"},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["composer"],
+        "properties": {
+          "composer": {"type": "string", "pattern": "^[a-z][a-z0-9-]*@[0-9]+$"},
+          "params": {"type": "object"},
+          "budget": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {"timeout_ms": {"type": "integer", "minimum": 1}, "max_vars": {"type": "integer", "minimum": 1}}
+          },
+          "on_fail": {"enum": ["stop", "continue"], "default": "continue"},
+          "role": {"enum": ["gate", "baseline"], "default": "gate"}
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "rule"],
+        "properties": {"id": {"type": "string"}, "rule": {"type": "string"}}
+      }
+    },
+    "seed": {"type": "integer", "minimum": 0}
+  }
+}
