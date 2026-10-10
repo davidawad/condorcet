@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assaymark.invalid/schemas/composer/v1.json",
-  "title": "assaymark composer declaration v1",
+  "$id": "https://condorcet.invalid/schemas/composer/v1.json",
+  "title": "condorcet composer declaration v1",
   "description": "A composer is a declared, versioned, swappable technique for composing evidence (logical, argumentation or probabilistic). One file per composer at composers/<name>/composer.json.",
   "type": "object",
   "additionalProperties": false,

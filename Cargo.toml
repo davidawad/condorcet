@@ -14,7 +14,7 @@ too_many_arguments = "warn"
 type_complexity = "warn"
 
 [workspace.dependencies]
-assaymark-core = { path = "crates/core" }
+condorcet-core = { path = "crates/core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 sha2 = "0.10"

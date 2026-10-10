@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assaymark.invalid/schemas/run/v1.json",
-  "title": "assaymark composition run v1 (run record)",
+  "$id": "https://condorcet.invalid/schemas/run/v1.json",
+  "title": "condorcet composition run v1 (run record)",
   "description": "The append-only, content-addressed record of one profile applied to one bundle. id = run:s256:<hex of the canonical JSON of this record without id and created_at>. memo_key = hash(bundle, profile, composer versions, seed), so an identical re-run is a lookup.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "id", "bundle", "profile", "composers", "memo_key", "steps", "verdict"],
   "properties": {
-    "schema": {"const": "assaymark/run/v1"},
+    "schema": {"const": "condorcet/run/v1"},
     "id": {"$ref": "#/$defs/runId"},
     "bundle": {"$ref": "#/$defs/bundleId"},
     "adapter": {

@@ -1,6 +1,6 @@
 [package]
-name = "assaymark-core"
-description = "Ids, envelope and schemas for the assaymark fact-composition engine"
+name = "condorcet-core"
+description = "Ids, envelope and schemas for the condorcet fact-composition engine"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
