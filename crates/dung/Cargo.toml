@@ -1,0 +1,19 @@
+[package]
+name = "condorcet-dung"
+description = "condorcet composer dung: grounded, preferred and stable argumentation semantics"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+condorcet-core.workspace = true
+condorcet-composer.workspace = true
+condorcet-sat.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

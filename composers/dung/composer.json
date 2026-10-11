@@ -1,0 +1,45 @@
+{
+  "$schema": "https://condorcet.invalid/schemas/composer/v1.json",
+  "name": "dung",
+  "version": "1",
+  "family": "argumentation",
+  "title": "Abstract argumentation: grounded, preferred and stable semantics",
+  "reference": [
+    {"cite": "Dung 1995, On the acceptability of arguments and its fundamental role in nonmonotonic reasoning, logic programming and n-person games", "doi": "10.1016/0004-3702(94)00041-X"}
+  ],
+  "inputs": {
+    "requires": ["claims", "links"],
+    "optional": ["constraints"],
+    "weights": ["unweighted", "reliability", "llr"],
+    "link_kinds": ["support", "contradict", "undercut"]
+  },
+  "outputs": [
+    {"name": "label", "type": "label", "per": "claim"},
+    {"name": "extensions", "type": "set", "per": "bundle"},
+    {"name": "exists", "type": "boolean", "per": "bundle"},
+    {"name": "credulous", "type": "set", "per": "bundle"},
+    {"name": "attackers", "type": "set", "per": "claim"}
+  ],
+  "assumptions": [
+    {"id": "binary-equal-attacks", "text": "Attacks are binary and equally strong; weights and probabilities are ignored."},
+    {"id": "arguments", "text": "Arguments are claims and evidential readings (links). An undercut makes the defeater attack the reading; a contradict reading attacks its claim; mutually exclusive claims attack each other."},
+    {"id": "sceptical-labels", "text": "For preferred and stable, a label is in (out) only when it is in (out) in every extension; otherwise undecided."}
+  ],
+  "cost": {
+    "class": "grounded P; stable NP-complete; sceptical preferred Pi2P-complete",
+    "typical": "milliseconds for kd-sized frameworks",
+    "budget": {"timeout_ms": 10000},
+    "on_exceed": "fail"
+  },
+  "exactness": "exact",
+  "deterministic": true,
+  "engine": {"kind": "builtin", "impl": "condorcet-dung (fixpoint; SAT labellings over rustsat + batsat)"},
+  "params": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "semantics": {"enum": ["grounded", "preferred", "stable"], "default": "grounded"},
+      "max_extensions": {"type": "integer", "minimum": 1, "default": 64}
+    }
+  }
+}
