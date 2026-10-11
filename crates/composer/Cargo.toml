@@ -1,6 +1,6 @@
 [package]
 name = "condorcet-composer"
-description = "condorcet composer crate (stub)"
+description = "condorcet Composer trait, composer specs, profiles, cascade runner and gate rules"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -11,3 +11,5 @@ workspace = true
 
 [dependencies]
 condorcet-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
