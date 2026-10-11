@@ -15,6 +15,16 @@ type_complexity = "warn"
 
 [workspace.dependencies]
 condorcet-core = { path = "crates/core" }
+condorcet-adapter = { path = "crates/adapter" }
+condorcet-composer = { path = "crates/composer" }
+condorcet-sat = { path = "crates/sat" }
+condorcet-wmc = { path = "crates/wmc" }
+condorcet-dung = { path = "crates/dung" }
+condorcet-jury = { path = "crates/jury" }
+condorcet-store = { path = "crates/store" }
+rustsat = { version = "0.7.5", default-features = false }
+rustsat-batsat = "0.7.5"
+proptest = { version = "1", default-features = false, features = ["std"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 sha2 = "0.10"
