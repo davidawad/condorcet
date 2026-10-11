@@ -136,7 +136,15 @@ dependencies = [
 name = "condorcet-cli"
 version = "0.1.0"
 dependencies = [
+ "condorcet-adapter",
+ "condorcet-composer",
  "condorcet-core",
+ "condorcet-dung",
+ "condorcet-jury",
+ "condorcet-sat",
+ "condorcet-store",
+ "condorcet-wmc",
+ "jsonschema",
  "serde_json",
 ]
 
@@ -197,6 +205,7 @@ name = "condorcet-store"
 version = "0.1.0"
 dependencies = [
  "condorcet-core",
+ "serde_json",
 ]
 
 [[package]]

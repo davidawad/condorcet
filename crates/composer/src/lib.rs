@@ -10,7 +10,7 @@ use serde_json::{Map, Value};
 use std::collections::BTreeMap;
 use std::time::Instant;
 
-pub use profile::{run_profile, GateSpec, Profile, Registry, Step};
+pub use profile::{memo_key, run_profile, GateSpec, Profile, Registry, Step};
 
 /// A composer's declaration, `composers/<name>/composer.json`.
 #[derive(Debug, Clone)]

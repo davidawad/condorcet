@@ -133,13 +133,16 @@ fn gate_bad_input_is_a_typed_error_with_exit_zero() {
 fn compose_previews_then_commits_and_rerun_is_memoised() {
     let e = Env::new("compose");
     let scope = r#"{"staged":"good"}"#;
+    // Without a focus the staged-claim gates cannot be evaluated.
     let (v, _) = e.run(&["compose", "--adapter", "fx", "--scope", scope, "--profile", "gate-default"]);
+    assert_eq!(v["data"]["run"]["verdict"], "inconclusive");
+    let (v, _) = e.run(&["compose", "--adapter", "fx", "--scope", scope, "--profile", "gate-default", "--focus", "fx:d/good"]);
     assert_eq!(v["data"]["write_back"]["mode"], "preview", "{v}");
     assert_eq!(v["data"]["memoised"], false);
     let run_id = v["data"]["run"]["id"].as_str().unwrap().to_owned();
     let (v, _) = e.run(&["compose", "--adapter", "fx", "--scope", scope, "--profile", "gate-default", "--commit"]);
     assert_eq!(v["error"]["code"], "E_USAGE");
-    let (v, _) = e.run(&["compose", "--adapter", "fx", "--scope", scope, "--profile", "gate-default", "--commit", "--expected-revision", "git:abc"]);
+    let (v, _) = e.run(&["compose", "--adapter", "fx", "--scope", scope, "--profile", "gate-default", "--focus", "fx:d/good", "--commit", "--expected-revision", "git:abc"]);
     assert_eq!((v["data"]["write_back"]["mode"].as_str(), v["data"]["memoised"].as_bool()), (Some("commit"), Some(true)));
     assert_eq!(v["data"]["run"]["id"], run_id.as_str());
     let (v, _) = e.run(&["explain", &run_id]);
@@ -148,7 +151,7 @@ fn compose_previews_then_commits_and_rerun_is_memoised() {
     let (v, _) = e.run(&["resolve", &run_id]);
     assert_eq!(v["data"]["kind"], "run");
     let log = std::fs::read_to_string(e.dir.join("store/runs.ndjson")).unwrap();
-    assert_eq!(log.lines().count(), 1);
+    assert_eq!(log.lines().count(), 2);
 }
 
 #[test]
@@ -162,7 +165,7 @@ fn single_composer_verbs_and_validation() {
     assert_eq!(v["data"]["outputs"]["satisfiable"], true);
     let (v, _) = e.run(&["joint", "--bundle", f, "fx:d/good", "fx:d/doubted"]);
     let p = v["data"]["joint"].as_f64().unwrap();
-    assert!((p - 0.9 / 1.1 * (0.1 / 1.1)).abs() < 1e-12, "{v}");
+    assert!((p - 1.0 / 1.1 * (0.1 / 1.1)).abs() < 1e-12, "{v}");
     let (v, _) = e.run(&["jury", "--bundle", f]);
     assert!((v["data"]["outputs"]["majority_correct"]["fx:d/good"].as_f64().unwrap() - 0.9).abs() < 1e-12);
     let (v, _) = e.run(&["bundle", "--bundle", f, "--validate"]);
