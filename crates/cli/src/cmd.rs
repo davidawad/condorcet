@@ -431,6 +431,25 @@ mod tests {
     }
 
     #[test]
+    fn engine_runs_validate_against_the_run_schema() {
+        for f in [
+            include_str!("../../../schemas/examples/bundle.video-clock.json"),
+            include_str!("../../../fixtures/contradictory-pair.json"),
+        ] {
+            let b = Bundle::from_json(serde_json::from_str(f).unwrap()).unwrap();
+            for (name, _) in registry::PROFILES {
+                let p = registry::builtin_profile(name).unwrap();
+                let q = Query::default_for(&b, Some(b.claims[0].id.clone()));
+                let mut r = run_profile(&b, &p, &q, &registry::composer);
+                r.created_at = Some(now_rfc3339());
+                let v = serde_json::to_value(&r).unwrap();
+                assert!(schema_errors("run", &v).is_empty(), "{name}: {:?}", schema_errors("run", &v));
+                assert!(schema_errors("bundle", &serde_json::to_value(&b).unwrap()).is_empty());
+            }
+        }
+    }
+
+    #[test]
     fn builtin_specs_and_profiles_load() {
         for id in registry::composer_ids() {
             assert!(registry::composer(&id).is_some(), "{id}");
