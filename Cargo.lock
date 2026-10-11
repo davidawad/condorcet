@@ -96,6 +96,8 @@ name = "condorcet-adapter"
 version = "0.1.0"
 dependencies = [
  "condorcet-core",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
