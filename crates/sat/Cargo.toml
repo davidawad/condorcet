@@ -1,0 +1,20 @@
+[package]
+name = "condorcet-sat"
+description = "condorcet composer sat-core: consistency and minimal unsatisfiable cores (rustsat + batsat)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+condorcet-core.workspace = true
+condorcet-composer.workspace = true
+serde_json.workspace = true
+rustsat.workspace = true
+rustsat-batsat.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
