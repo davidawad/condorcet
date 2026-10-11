@@ -1,0 +1,20 @@
+{
+  "schema": "condorcet/bundle/v1",
+  "adapter": {"id": "fixture", "version": "1"},
+  "claims": [
+    {"id": "org:t/a", "text": "The meeting was on Monday", "prior": 0.5},
+    {"id": "org:t/b", "text": "The meeting was on Tuesday", "prior": 0.5},
+    {"id": "org:t/c", "text": "The meeting was recorded", "prior": 0.5}
+  ],
+  "exhibits": [
+    {"id": "org:t/ex-cal", "reading": {"claim": "org:t/a"}},
+    {"id": "org:t/ex-mail", "reading": {"claim": "org:t/b"}}
+  ],
+  "links": [
+    {"id": "link:org:t/ex-cal>org:t/a", "kind": "support", "from": "org:t/ex-cal", "to": "org:t/a", "weight": {"reliability": 0.9}},
+    {"id": "link:org:t/ex-mail>org:t/b", "kind": "support", "from": "org:t/ex-mail", "to": "org:t/b", "weight": {"reliability": 0.8}}
+  ],
+  "constraints": [
+    {"id": "k-ab", "kind": "excludes", "claims": ["org:t/a", "org:t/b"], "mode": "hard", "basis": "one meeting, one day"}
+  ]
+}
