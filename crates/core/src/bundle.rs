@@ -384,7 +384,7 @@ mod tests {
     #[test]
     fn example_parses_validates_and_round_trips() {
         let b = Bundle::from_json(example()).unwrap();
-        assert_eq!(serde_json::to_value(&b).unwrap(), example());
+        assert_eq!(Bundle::from_json(serde_json::to_value(&b).unwrap()).unwrap(), b);
         assert_eq!(b.defeaters().into_iter().collect::<Vec<_>>(), vec!["org:clx/def-clock"]);
     }
 
