@@ -90,7 +90,7 @@ fn normalize(mut cs: Vec<Clause>) -> Vec<Clause> {
         c.sort_unstable();
         c.dedup();
     }
-    cs.retain(|c| !c.windows(2).any(|w| w[0] == -w[1]));
+    cs.retain(|c| !c.iter().any(|&l| c.contains(&-l)));
     cs.sort();
     cs.dedup();
     cs
@@ -143,8 +143,11 @@ impl<'a> Counter<'a> {
             factor *= before.iter().filter(|&&v| v != var(unit) && !after.contains(&v)).map(|&v| self.free(v)).product::<f64>();
             cs = next;
         }
-        let mut total = factor;
-        for comp in components(normalize(cs)) {
+        let before = vars_of(&cs);
+        let cs = normalize(cs);
+        let after = vars_of(&cs);
+        let mut total = factor * before.difference(&after).map(|&v| self.free(v)).product::<f64>();
+        for comp in components(cs) {
             total *= self.component(comp)?;
             if total == 0.0 {
                 return Ok(0.0);

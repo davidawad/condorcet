@@ -179,6 +179,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "condorcet-wmc"
+version = "0.1.0"
+dependencies = [
+ "condorcet-composer",
+ "condorcet-core",
+ "proptest",
+ "serde_json",
+]
+
+[[package]]
 name = "core_detect"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
