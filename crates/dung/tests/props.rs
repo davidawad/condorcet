@@ -82,8 +82,8 @@ proptest! {
         }
         let exts: Vec<Ext> = st.into_iter().collect();
         let lab = sceptical(&af, &exts);
-        for a in 0..af.len() {
-            if lab[a] == Label::In {
+        for (a, l) in lab.iter().enumerate() {
+            if *l == Label::In {
                 prop_assert!(exts.iter().all(|e| e.contains(&a)));
             }
         }
