@@ -36,7 +36,11 @@
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "rule"],
-        "properties": {"id": {"type": "string"}, "rule": {"type": "string"}}
+        "properties": {
+          "id": {"type": "string"},
+          "rule": {"type": "string", "description": "<composer>.<output>[(<arg>)] <op> <literal>; op is one of == != >= <= > <; arg is a set name, a claim id, or staged."},
+          "on_fail": {"enum": ["hold", "refuse"], "default": "hold", "description": "How a failure of this gate maps onto the gate verdict (pass | hold | refuse)."}
+        }
       }
     },
     "seed": {"type": "integer", "minimum": 0}
