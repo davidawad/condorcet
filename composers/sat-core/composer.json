@@ -1,0 +1,45 @@
+{
+  "$schema": "https://condorcet.invalid/schemas/composer/v1.json",
+  "name": "sat-core",
+  "version": "1",
+  "family": "logical",
+  "title": "Consistency check with minimal unsatisfiable cores",
+  "reference": [
+    {"cite": "Liffiton & Sakallah 2008, Algorithms for computing minimal unsatisfiable subsets of constraints", "doi": "10.1007/s10817-007-9084-z"},
+    {"cite": "Jabs 2025, RustSAT: a library for SAT solving in Rust", "url": "https://media.christophjabs.info/papers/Jabs2025RustsatLibrarySat.pdf"}
+  ],
+  "inputs": {
+    "requires": ["claims"],
+    "optional": ["constraints", "links"],
+    "weights": ["unweighted", "reliability", "llr"],
+    "link_kinds": ["support", "contradict"]
+  },
+  "outputs": [
+    {"name": "satisfiable", "type": "boolean", "per": "bundle"},
+    {"name": "model", "type": "model", "per": "bundle"},
+    {"name": "core", "type": "core", "per": "bundle"},
+    {"name": "cores", "type": "set", "per": "bundle"}
+  ],
+  "assumptions": [
+    {"id": "two-valued", "text": "Each claim is true or false under classical semantics."},
+    {"id": "hard-only", "text": "Only hard relations count: assumed claims, hard constraints, and unweighted claim-to-claim support (implication) and contradict (exclusion) links. Weighted evidence is ignored."},
+    {"id": "joint-improbability-invisible", "text": "A set of claims each at P >= 0.95 can be satisfiable here and still jointly improbable; that is wmc-exact's job."}
+  ],
+  "cost": {
+    "class": "NP-complete",
+    "typical": "milliseconds for thousands of clauses; one SAT call per core member to shrink",
+    "budget": {"max_cores": 1, "timeout_ms": 10000},
+    "on_exceed": "fail"
+  },
+  "exactness": "exact",
+  "deterministic": true,
+  "engine": {"kind": "builtin", "impl": "condorcet-sat (rustsat + batsat)"},
+  "params": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "assume": {"enum": ["all", "noticed"], "default": "all", "description": "Which claims are asserted true: every claim except undercut defeaters, or only noticed ones."},
+      "max_cores": {"type": "integer", "minimum": 1, "default": 1, "description": "Enumerate up to this many minimal cores (MARCO)."}
+    }
+  }
+}
