@@ -15,4 +15,12 @@ path = "src/main.rs"
 
 [dependencies]
 condorcet-core.workspace = true
+condorcet-adapter.workspace = true
+condorcet-composer.workspace = true
+condorcet-sat.workspace = true
+condorcet-wmc.workspace = true
+condorcet-dung.workspace = true
+condorcet-jury.workspace = true
+condorcet-store.workspace = true
 serde_json.workspace = true
+jsonschema.workspace = true
