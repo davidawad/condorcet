@@ -63,7 +63,9 @@ fn cluster_of(b: &Bundle, from: &str) -> Option<(String, f64)> {
 }
 
 /// Unnormalised weight of every claim assignment (bitmask), summed over
-/// all latent draws.
+/// all latent draws. Kept as one literal transcription of the model, so
+/// the oracle is easy to audit against the prose.
+#[allow(clippy::too_many_lines, clippy::type_complexity)]
 fn oracle(b: &Bundle, base: f64) -> BTreeMap<u32, f64> {
     let n = b.claims.len();
     let ix = b.claim_index();
