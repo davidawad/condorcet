@@ -1,0 +1,49 @@
+{
+  "$schema": "https://condorcet.invalid/schemas/composer/v1.json",
+  "name": "wmc-exact",
+  "version": "1",
+  "family": "probabilistic",
+  "title": "Weighted model counting over a source-reliability encoding",
+  "reference": [
+    {"cite": "Chavira & Darwiche 2008, On probabilistic inference by weighted model counting", "doi": "10.1016/j.artint.2007.11.002"},
+    {"cite": "Fierens et al. 2014, Inference and learning in probabilistic logic programs using weighted Boolean formulas", "doi": "10.1017/S1471068414000076"}
+  ],
+  "inputs": {
+    "requires": ["claims", "links"],
+    "optional": ["exhibits", "constraints", "clusters"],
+    "weights": ["reliability", "llr"],
+    "link_kinds": ["support", "contradict", "undercut"]
+  },
+  "outputs": [
+    {"name": "marginal", "type": "probability", "per": "claim"},
+    {"name": "joint", "type": "probability", "per": "claim_set"},
+    {"name": "conditional", "type": "probability", "per": "claim_set"},
+    {"name": "expected_false", "type": "number", "per": "claim_set"},
+    {"name": "partition", "type": "number", "per": "bundle"}
+  ],
+  "assumptions": [
+    {"id": "binary-claims", "text": "Each claim is true or false; no degrees."},
+    {"id": "reliability-model", "text": "A link fires with probability r (llr x gives r = 1 - e^-x) independently, except through declared clusters; a firing, un-undercut support link forces its claim true (contradict: false)."},
+    {"id": "cluster-model", "text": "Within a cluster of correlation rho, each link copies a shared draw with probability rho, else draws alone; the shared draw is comonotone across members with different reliabilities."},
+    {"id": "no-hidden-common-cause", "text": "Dependence not declared as a cluster is absent."},
+    {"id": "priors-are-base-rates", "text": "Claim priors are base rates, not earlier composed estimates; otherwise a re-run double counts."}
+  ],
+  "cost": {
+    "class": "#P-hard",
+    "typical": "exponential in treewidth, not size: milliseconds for forest-like bundles of hundreds of variables",
+    "budget": {"max_vars": 3000, "timeout_ms": 30000},
+    "on_exceed": "fail"
+  },
+  "exactness": "exact",
+  "deterministic": true,
+  "engine": {"kind": "builtin", "impl": "condorcet-wmc (component-caching DPLL)"},
+  "params": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "encoding": {"enum": ["source-reliability"], "default": "source-reliability"},
+      "base_rate": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.5, "description": "Prior for a claim with none."},
+      "unweighted": {"enum": ["error", "ignore"], "default": "error", "description": "What to do with an unweighted support/contradict link."}
+    }
+  }
+}
