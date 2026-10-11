@@ -15,7 +15,7 @@ fn brute_sat(n: usize, els: &[&Element]) -> bool {
     })
 }
 
-fn subset<'a>(els: &'a [Element], mask: u32) -> Vec<&'a Element> {
+fn subset(els: &[Element], mask: u32) -> Vec<&Element> {
     els.iter().enumerate().filter(|(i, _)| (mask >> i) & 1 == 1).map(|(_, e)| e).collect()
 }
 
@@ -73,10 +73,8 @@ proptest! {
         prop_assert_eq!(out["satisfiable"].as_bool(), Some(sat));
         if sat {
             let t: BTreeSet<&str> = out["model"]["true"].as_array().unwrap().iter().filter_map(Value::as_str).collect();
-            let ix = b.claim_index();
             let model = |c: usize| t.contains(b.claims[c].id.as_str());
             prop_assert!(els.iter().all(|e| e.clauses.iter().all(|c| c.iter().any(|&(v, p)| model(v) == p))));
-            let _ = ix;
         } else {
             let core: BTreeSet<String> = out["core"].as_array().unwrap().iter().filter_map(|x| x.as_str().map(str::to_owned)).collect();
             let muses = brute_muses(b.claims.len(), &els);
