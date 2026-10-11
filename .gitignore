@@ -2,3 +2,4 @@
 .beads/*.db
 .beads/*.db-*
 .worktrees/
+.beads/issues.jsonl
