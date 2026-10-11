@@ -31,12 +31,21 @@ impl Env {
             {"id": "fx:d/doubted", "text": "contradicted", "prior": 0.5},
             {"id": "fx:d/rival", "text": "excludes good", "prior": 0.5}
         ]);
+        let mut peer_claims = claims.as_array().unwrap().clone();
+        peer_claims.extend(["f-egp-float", "f-egp-peg", "f-staged", "f-both"].map(|n| json!({"id": format!("fx:d/{n}"), "text": n, "prior": 0.5})));
+        let peer_claims = json!(peer_claims);
         let support = json!({"id": "link:fx:ex1>fx:d/good", "kind": "support", "from": "fx:ex1", "to": "fx:d/good", "weight": {"reliability": 0.9}});
         let contra = json!({"id": "link:fx:ex2>fx:d/doubted", "kind": "contradict", "from": "fx:ex2", "to": "fx:d/doubted", "weight": {"reliability": 0.9}});
         let fixtures = [
             ("good", bundle(&claims, &json!([support]), &json!([]))),
             ("doubted", bundle(&claims, &json!([support, contra]), &json!([]))),
             ("rival", bundle(&claims, &json!([support]), &json!([{"id": "k", "kind": "excludes", "claims": ["fx:d/good", "fx:d/rival"], "mode": "hard"}]))),
+            // Two already-promoted peers contradict; the staged fact is unrelated to them.
+            ("f-staged", bundle(&peer_claims, &json!([support]), &json!([{"id": "k-egp", "kind": "excludes", "claims": ["fx:d/f-egp-float", "fx:d/f-egp-peg"], "mode": "hard"}]))),
+            // The staged fact conflicts with a peer, and the peers also conflict with each other.
+            ("f-both", bundle(&peer_claims, &json!([support]), &json!([
+                {"id": "k-egp", "kind": "excludes", "claims": ["fx:d/f-egp-float", "fx:d/f-egp-peg"], "mode": "hard"},
+                {"id": "k-st", "kind": "excludes", "claims": ["fx:d/f-both", "fx:d/f-egp-peg"], "mode": "hard"}]))),
         ];
         for (k, v) in &fixtures {
             std::fs::write(dir.join(format!("{k}.json")), v.to_string()).unwrap();
@@ -100,6 +109,32 @@ fn gate_reports_pass_hold_refuse_in_the_kd_contract() {
     let (v, _) = e.gate("rival", "gate-default");
     assert_eq!(verdict(&v), "refuse", "{v}");
     assert!(v["data"]["reasons"].to_string().contains("unsat core"));
+}
+
+#[test]
+fn contradicting_peers_do_not_refuse_an_unrelated_staged_fact() {
+    let e = Env::new("peers");
+    // The reported run: f-egp-float and f-egp-peg contradict, the staged fact is unrelated.
+    let (v, _) = e.gate("f-staged", "gate-default");
+    assert_eq!(verdict(&v), "hold", "{v}");
+    let cores = v["data"]["peer_conflicts"].as_array().unwrap();
+    assert_eq!(cores.len(), 1, "{v}");
+    let core = cores[0].to_string();
+    assert!(core.contains("f-egp-float") && core.contains("f-egp-peg") && !core.contains("f-staged"), "{core}");
+    assert!(v["data"]["reasons"].to_string().contains("peer conflicts"), "{v}");
+    // Old fields stay.
+    assert!(v["data"]["run"].as_str().unwrap().starts_with("run:s256:"));
+    // A consistent bundle reports no peer conflicts.
+    let (v, _) = e.gate("good", "gate-default");
+    assert_eq!(v["data"]["peer_conflicts"], json!([]), "{v}");
+}
+
+#[test]
+fn a_staged_fact_in_some_core_is_refused_and_peer_cores_still_listed() {
+    let e = Env::new("both");
+    let (v, _) = e.gate("f-both", "gate-default");
+    assert_eq!(verdict(&v), "refuse", "{v}");
+    assert_eq!(v["data"]["peer_conflicts"].as_array().unwrap().len(), 1, "{v}");
 }
 
 #[test]

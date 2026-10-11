@@ -296,7 +296,19 @@ fn gate(a: &Args) -> R {
     })?;
     let q = query(a, &b, Some(claim.clone()))?;
     let (r, memoised, warn) = run(&b, &profile, &q);
-    let (verdict, reasons) = gate_verdict(&profile, &r, &claim);
+    let peers = peer_conflicts(&b, &profile, &claim);
+    let peer_only = peers.as_ref().is_some_and(|p| !p.involves_claim && !p.peer_cores.is_empty());
+    let (verdict, mut reasons) = gate_verdict(&profile, &r, &claim, peer_only);
+    if let Some(p) = peers.as_ref().filter(|p| !p.peer_cores.is_empty()) {
+        reasons.push(if p.involves_claim {
+            format!("peer conflicts: {} further core(s) do not involve {claim}", p.peer_cores.len())
+        } else {
+            format!(
+                "peer conflicts: {} unsat core(s) among already-promoted facts do not involve {claim}; its marginal is undefined while they stand, so the verdict is hold, not refuse",
+                p.peer_cores.len()
+            )
+        });
+    }
     let pick = |composer: &str, output: &str, key: &str| -> Value {
         r.steps
             .iter()
@@ -328,6 +340,7 @@ fn gate(a: &Args) -> R {
         "claims": b.claims.len(),
         "memoised": memoised,
         "scope": scope,
+        "peer_conflicts": peers.map_or_else(Vec::new, |p| p.peer_cores),
     });
     if let Some(w) = warn {
         data["warning"] = json!(w);
@@ -335,9 +348,25 @@ fn gate(a: &Args) -> R {
     Ok(data)
 }
 
+/// Minimal unsat cores of the bundle classified by whether they contain the
+/// staged claim; `None` when the profile has no `sat-core` step or the
+/// enumeration ran out of budget (the plain cascade verdict then stands).
+fn peer_conflicts(b: &Bundle, profile: &Profile, claim: &str) -> Option<condorcet_sat::StagedCores> {
+    let step = profile.steps.iter().find(|s| s.composer.starts_with("sat-core@"))?;
+    let assume = step.params.as_ref().and_then(|p| p.get("assume")).and_then(Value::as_str).unwrap_or("all");
+    let spec = registry::composer(&step.composer)?;
+    let budget = spec.spec().default_budget().started();
+    condorcet_sat::staged_cores(b, claim, assume, 8, &budget).ok()
+}
+
 /// pass | hold | refuse, and why. A failed gate maps by its `on_fail`
 /// (default hold); an inconclusive run holds.
-fn gate_verdict(profile: &Profile, r: &RunRecord, claim: &str) -> (&'static str, Vec<String>) {
+///
+/// `peer_only`: every unsat core avoids the staged claim. The staged fact is
+/// then not the cause, so a failed `sat-core.*` gate never refuses it; the
+/// consistency step stops the cascade, no posterior exists (the weighted
+/// count over zero models is 0/0), and the verdict is hold.
+fn gate_verdict(profile: &Profile, r: &RunRecord, claim: &str, peer_only: bool) -> (&'static str, Vec<String>) {
     let mut refuse = false;
     let mut reasons = Vec::new();
     for (spec, rec) in profile.gates.iter().zip(&r.gates) {
@@ -345,7 +374,7 @@ fn gate_verdict(profile: &Profile, r: &RunRecord, claim: &str) -> (&'static str,
         if detail.starts_with("not evaluated") {
             reasons.push(format!("{}: {detail}", rec.id));
         } else if !rec.passed {
-            refuse |= spec.on_fail.as_deref() == Some("refuse");
+            refuse |= spec.on_fail.as_deref() == Some("refuse") && !(peer_only && spec.rule.starts_with("sat-core."));
             reasons.push(format!("{} failed: {detail}", rec.id));
         }
     }

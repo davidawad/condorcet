@@ -150,9 +150,28 @@ impl Instance {
     /// # Errors
     /// Budget exhausted.
     pub fn enumerate(&mut self, max: usize, budget: &Budget) -> Result<Vec<BTreeSet<usize>>, ComposeError> {
+        self.enumerate_where(None, max, budget)
+    }
+
+    /// [`Self::enumerate`] restricted to the cores that contain (`(i, true)`)
+    /// or avoid (`(i, false)`) element `i`; exact, since the restriction is a
+    /// unit clause on the map solver.
+    ///
+    /// # Errors
+    /// Budget exhausted.
+    pub fn enumerate_where(
+        &mut self,
+        force: Option<(usize, bool)>,
+        max: usize,
+        budget: &Budget,
+    ) -> Result<Vec<BTreeSet<usize>>, ComposeError> {
         let n = self.selectors.len();
         let mut map = Sat::new();
         let m: Vec<u32> = (0..n).map(|_| map.var()).collect();
+        if let Some((i, want)) = force {
+            map.add(&[(m[i], want)]);
+        }
+        let frozen = force.and_then(|(i, want)| (!want).then_some(i));
         let mut out = Vec::new();
         while out.len() < max {
             budget.check_time()?;
@@ -163,7 +182,7 @@ impl Instance {
             if self.check(&seed) {
                 let mut mss = seed;
                 for i in 0..n {
-                    if !mss.contains(&i) {
+                    if !mss.contains(&i) && frozen != Some(i) {
                         mss.insert(i);
                         if !self.check(&mss) {
                             mss.remove(&i);
@@ -179,11 +198,41 @@ impl Instance {
                 let mus = self.shrink(&seed, budget)?;
                 let block: Vec<L> = mus.iter().map(|&i| (m[i], false)).collect();
                 map.add(&block);
-                out.push(mus);
+                if force.is_none_or(|(i, want)| mus.contains(&i) == want) {
+                    out.push(mus);
+                }
             }
         }
         Ok(out)
     }
+}
+
+/// How a bundle's inconsistency relates to one claim.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct StagedCores {
+    /// Some minimal unsat core contains the claim.
+    pub involves_claim: bool,
+    /// Minimal unsat cores (element ids) that do not contain the claim.
+    pub peer_cores: Vec<Vec<String>>,
+}
+
+/// Classify the minimal unsat cores of `b` by membership of `claim`,
+/// listing up to `max_peer` cores that avoid it. Exact: membership is a
+/// restricted MARCO run, not a prefix of an enumeration.
+///
+/// # Errors
+/// Budget exhausted.
+pub fn staged_cores(b: &Bundle, claim: &str, assume: &str, max_peer: usize, budget: &Budget) -> Result<StagedCores, ComposeError> {
+    let els = elements(b, assume);
+    let mut inst = Instance::new(b.claims.len(), &els);
+    let unit = els.iter().position(|e| e.id == claim);
+    let involves_claim = match unit {
+        Some(u) => !inst.enumerate_where(Some((u, true)), 1, budget)?.is_empty(),
+        None => false,
+    };
+    let peers = inst.enumerate_where(unit.map(|u| (u, false)), max_peer, budget)?;
+    let peer_cores = peers.iter().map(|s| s.iter().map(|&i| els[i].id.clone()).collect()).collect();
+    Ok(StagedCores { involves_claim, peer_cores })
 }
 
 pub struct SatCore {
@@ -240,5 +289,29 @@ impl Composer for SatCore {
         out.outputs.insert("cores".into(), json!(cores));
         out.evidence.extend(cores.into_iter().map(|c| Evidence::new("unsat_core", c, None)));
         Ok(out)
+    }
+}
+
+#[cfg(test)]
+mod staged_tests {
+    use super::*;
+
+    #[test]
+    fn claim_membership_in_cores_is_exact() {
+        // a excludes b (hard); c is unrelated.
+        let b = Bundle::from_json(serde_json::json!({
+            "schema": "condorcet/bundle/v1", "adapter": {"id": "t", "version": "1"},
+            "claims": [{"id": "a", "text": "a", "prior": 0.5}, {"id": "b", "text": "b", "prior": 0.5}, {"id": "c", "text": "c", "prior": 0.5}],
+            "exhibits": [], "links": [],
+            "constraints": [{"id": "k", "kind": "excludes", "claims": ["a", "b"], "mode": "hard"}]
+        }))
+        .unwrap();
+        let bud = ComposerSpec::builtin(SPEC).default_budget().started();
+        let c = staged_cores(&b, "c", "all", 4, &bud).unwrap();
+        assert!(!c.involves_claim);
+        assert_eq!(c.peer_cores, vec![vec!["a".to_owned(), "b".into(), "k".into()]]);
+        let a = staged_cores(&b, "a", "all", 4, &bud).unwrap();
+        assert!(a.involves_claim);
+        assert!(a.peer_cores.is_empty());
     }
 }

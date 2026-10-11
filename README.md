@@ -33,6 +33,8 @@ condorcet resolve <run:|bundle:|composer:|profile: id>
 
 Every command prints `{"ok":true,"data":...}` or `{"ok":false,"error":{"code","message","next"}}`. `gate` always exits 0. Its data is `{"verdict":"pass"|"hold"|"refuse","reasons":[...],"run":"run:s256:..",...}`.
 
+`gate` refuses a staged fact only when that fact belongs to some minimal unsat core. Cores that avoid it (contradictions among already-promoted peers) never refuse it: each is listed in `peer_conflicts` (arrays of claim, constraint and link ids; `[]` when none), with a reason line. When every core avoids the staged fact, the verdict is `hold`: with no model the weighted count is 0/0, so its marginal is undefined, and dropping an arbitrary peer to compute one would be unprincipled.
+
 Profiles are looked up in this order: a file path, then `$CONDORCET_PROFILES` directories, then the built-in `profiles/`, and finally the adapter's `profile <name>`. The store lives at `$CONDORCET_HOME` (default `~/.local/share/condorcet`). It holds `runs.ndjson`, `runs/`, `memo/` and `bundles/`.
 
 ## Adapters
