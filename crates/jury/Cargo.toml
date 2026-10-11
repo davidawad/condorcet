@@ -1,0 +1,18 @@
+[package]
+name = "condorcet-jury"
+description = "condorcet composer condorcet-jury: Condorcet jury theorem with correlated-juror collapse"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+condorcet-core.workspace = true
+condorcet-composer.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://condorcet.invalid/schemas/composer/v1.json",
+  "name": "condorcet-jury",
+  "version": "1",
+  "family": "probabilistic",
+  "title": "Condorcet jury theorem: probability the majority of readings is correct",
+  "reference": [
+    {"cite": "Condorcet 1785, Essai sur l'application de l'analyse a la probabilite des decisions rendues a la pluralite des voix", "url": "https://gallica.bnf.fr/ark:/12148/bpt6k417181"}
+  ],
+  "inputs": {
+    "requires": ["claims", "links"],
+    "optional": ["exhibits", "clusters"],
+    "weights": ["reliability", "llr"],
+    "link_kinds": ["support", "contradict"]
+  },
+  "outputs": [
+    {"name": "majority_correct", "type": "probability", "per": "claim"},
+    {"name": "raw_majority_correct", "type": "probability", "per": "claim"},
+    {"name": "ceiling", "type": "probability", "per": "claim"},
+    {"name": "majority", "type": "label", "per": "claim"},
+    {"name": "jurors", "type": "number", "per": "claim"}
+  ],
+  "assumptions": [
+    {"id": "independent-jurors", "text": "Votes are independent given the truth, except through declared clusters, which are collapsed to one juror (mean competence, majority vote)."},
+    {"id": "competence-from-adapter", "text": "A juror's competence is its link reliability (llr x gives 1 - e^-x); jurors at or below 0.5 are dropped and reported."},
+    {"id": "fair-tie-break", "text": "With an even jury a tie is broken by a fair coin."},
+    {"id": "not-a-posterior", "text": "majority_correct is the reliability of the majority procedure, not P(claim); read it beside majority."}
+  ],
+  "cost": {"class": "P", "typical": "O(n^2) per claim", "budget": {"max_vars": 100000}, "on_exceed": "fail"},
+  "exactness": "exact",
+  "deterministic": true,
+  "engine": {"kind": "builtin", "impl": "condorcet-jury (Poisson-binomial dynamic programming)"},
+  "params": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "clusters": {"enum": ["collapse", "ignore"], "default": "collapse", "description": "collapse each correlated cluster to one juror, or ignore correlation (reported as raw anyway)."}
+    }
+  }
+}
