@@ -171,6 +171,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "condorcet-jury"
+version = "0.1.0"
+dependencies = [
+ "condorcet-composer",
+ "condorcet-core",
+ "proptest",
+ "serde_json",
+]
+
+[[package]]
 name = "condorcet-sat"
 version = "0.1.0"
 dependencies = [
