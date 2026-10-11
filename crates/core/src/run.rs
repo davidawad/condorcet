@@ -98,12 +98,12 @@ pub fn hash(doc: &Value) -> String {
     format!("s256:{:x}", Sha256::digest(crate::id::canonical_json(doc).as_bytes()))
 }
 
-/// The memo key: identical (bundle, profile, composer versions, seed) gives
-/// an identical key, so a re-run is a lookup.
+/// The memo key: identical (bundle, profile, composer versions, seed,
+/// query) gives an identical key, so a re-run is a lookup.
 #[must_use]
-pub fn memo_key(bundle_id: &str, profile: &Value, composers: &[String], seed: Option<u64>) -> String {
+pub fn memo_key(bundle_id: &str, profile: &Value, composers: &[String], seed: Option<u64>, query: &Value) -> String {
     hash(&serde_json::json!({
-        "bundle": bundle_id, "profile": profile, "composers": composers, "seed": seed
+        "bundle": bundle_id, "profile": profile, "composers": composers, "seed": seed, "query": query
     }))
 }
 

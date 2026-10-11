@@ -1,73 +1,44 @@
 # condorcet
 
-A configurable engine for how true a body of information is. It takes a
-**bundle** (claims, the exhibits that bear on them, the support / contradict /
-undercut links between them, declared constraints and independence clusters),
-a **composer** declared as JSON (a logical, argumentation or probabilistic
-technique) and a **profile** (an ordered cascade of composer steps plus
-gates), and emits an append-only, content-addressed **composition run**: a
-score or verdict for each claim and for sets of claims, plus the evidence for
-it (unsat cores, drop sets, extensions, circuits, seeds).
+A fact-composition engine. A fact adapter supplies a **bundle**: claims, the exhibits that bear on them, weighted support, contradict and undercut links, constraints and independence clusters. A **profile** then runs a cascade of declared **composers** over that bundle. The result is an append-only, content-addressed **run** record. The engine contains no domain rules: adapters turn their own rules of evidence into numbers, and the engine composes the numbers.
 
-Techniques disagree on purpose. The technique is a declared, versioned,
-swappable thing, not code buried in a scorer. The adapter turns a domain's
-rules of evidence into numbers; the engine composes numbers and never learns
-what a business record is.
+## Composers (built in)
 
-Status: **v0.1 scaffold.** Local-only: no remote, not published. The
-schemas, content-addressed ids and the `{ok, data | error}` envelope exist;
-no composer is implemented yet.
+| id | family | answers |
+|---|---|---|
+| `sat-core@1` | logical | Can the asserted claims and hard relations hold together? If not, what are the minimal unsatisfiable cores (deletion MUS, MARCO enumeration; rustsat + batsat)? |
+| `wmc-exact@1` | probabilistic | Exact marginal, joint and conditional probabilities, expected false members, and the partition. Uses encoding S and its own component-caching DPLL weighted model counter. |
+| `dung@1` | argumentation | Grounded, preferred and stable labellings, with attacker chains. |
+| `condorcet-jury@1` | probabilistic | The probability that the majority of readings is correct. Correlated clusters are collapsed, and the ceiling is reported. |
 
-## Layers
+Each composer is declared in `composers/<name>/composer.json` (schema `schemas/composer.schema.json`). Each one is property-tested against brute-force enumeration.
 
-| Layer | Noun | ID form | Declared as |
-|---|---|---|---|
-| L0 | Bundle (claims, exhibits, links, constraints, clusters) | `bundle:s256:<hex>` | produced by a fact adapter, `schemas/bundle.schema.json` |
-| L1 | Composer | `composer:<name>@<n>` | `composers/<name>/composer.json`, `schemas/composer.schema.json` |
-| L2 | Profile | `profile:<name>@<n>` | `profiles/<name>.json`, `schemas/profile.schema.json` |
-| L3 | Composition run | `run:s256:<hex>` | append-only record, `schemas/run.schema.json` |
+## CLI
 
-Every id names its kind. Output is `{"ok": true, "data": ...}` or
-`{"ok": false, "error": {"code", "message", "next"}}`.
-
-## Layout
-
-```
-crates/core       ids, envelope (Bundle and run types arrive with the beads that use them)
-crates/adapter    FactAdapter trait and adapter protocol (stub)
-crates/composer   Composer trait, spec loader, cascade runner (stub)
-crates/store      append-only run log, memo, bundle cache (stub)
-crates/cli        the `condorcet` binary (stub: `condorcet status`)
-schemas/          bundle, composer, profile, run JSON schemas, plus examples/
-composers/        one directory per composer (empty so far)
-profiles/         one file per profile (empty so far)
+```text
+condorcet status
+condorcet composer list | show <name> | validate <file>
+condorcet profile list | show <name> | validate <file>
+condorcet adapters
+condorcet bundle  (--bundle F | --adapter A --scope J) [--validate]
+condorcet compose (--bundle F | --adapter A --scope J) --profile P [--focus C] [--set name=a,b] [--commit --expected-revision R] [--write-estimates]
+condorcet joint   --bundle F <claim>...
+condorcet core    --bundle F [--max-cores N]
+condorcet argue   --bundle F [--semantics grounded|preferred|stable]
+condorcet jury    --bundle F
+condorcet gate    --adapter A --profile P --staged ID [--proposed PATH]
+condorcet explain run:s256:<hex>
+condorcet resolve <run:|bundle:|composer:|profile: id>
 ```
 
-The workspace has no dependency outside its own directory; a test enforces it.
+Every command prints `{"ok":true,"data":...}` or `{"ok":false,"error":{"code","message","next"}}`. `gate` always exits 0. Its data is `{"verdict":"pass"|"hold"|"refuse","reasons":[...],"run":"run:s256:..",...}`.
 
-## Build
+Profiles are looked up in this order: a file path, then `$CONDORCET_PROFILES` directories, then the built-in `profiles/`, and finally the adapter's `profile <name>`. The store lives at `$CONDORCET_HOME` (default `~/.local/share/condorcet`). It holds `runs.ndjson`, `runs/`, `memo/` and `bundles/`.
 
-```
-cargo build
-cargo test
-cargo clippy --all-targets -- -D warnings
-```
+## Adapters
 
-## Design
+An adapter is an executable `condorcet-adapter-<id>` on `PATH` that speaks `condorcet/adapter/v1`. It supports `capabilities`, `load --scope <json>`, `profile <name>` and `write-back [--commit --expected-revision R]`. The protocol is documented in `crates/adapter/src/lib.rs`. The built-in `file` adapter reads a bundle from disk.
 
-The design lives in the author's dotfiles repository
-(`docs/architecture/fact-composition.md`); the Condorcet jury composer note is
-`docs/design/condorcet-jury.md`; planned work is tracked in this
-repository's `.beads/` store.
+## Development
 
-## License
-
-Dual-licensed under MIT or Apache-2.0, at your option. See `LICENSE-MIT` and
-`LICENSE-APACHE`.
-
-## History
-
-This project was named `assaymark` until 2026-10-10. Existing bead ids keep
-the old `assaymark-` prefix, because `br` has no
-command to rewrite ids. New top-level issues use the `condorcet` prefix (config
-`issue_prefix`); children take their parent id.
+Work in `.worktrees/`. The gate is `cargo test` plus `cargo clippy --all-targets -- -D warnings`. The schemas under `schemas/` are the contract.

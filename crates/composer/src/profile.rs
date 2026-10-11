@@ -99,6 +99,15 @@ impl Profile {
     }
 }
 
+/// The memo key of running `profile` over the bundle `bundle_id` with `q`:
+/// known before the run, so an identical re-run is a store lookup.
+#[must_use]
+pub fn memo_key(bundle_id: &str, profile: &Profile, q: &Query) -> String {
+    let composers: Vec<String> = profile.steps.iter().map(|s| s.composer.clone()).collect();
+    let query = serde_json::json!({"sets": q.sets, "focus": q.focus});
+    condorcet_core::run::memo_key(bundle_id, &profile.to_value(), &composers, profile.seed, &query)
+}
+
 /// Looks up a composer by `name@version`.
 pub type Registry<'a> = dyn Fn(&str) -> Option<Box<dyn Composer>> + 'a;
 
@@ -187,7 +196,7 @@ pub fn run_profile(b: &Bundle, profile: &Profile, q: &Query, registry: &Registry
     let mut rec = RunRecord {
         schema: RUN_SCHEMA.into(),
         id: String::new(),
-        memo_key: condorcet_core::run::memo_key(&bundle_id, &profile.to_value(), &composers, profile.seed),
+        memo_key: memo_key(&bundle_id, profile, q),
         bundle: bundle_id,
         adapter: Some(b.adapter.clone()),
         profile: NameVersion { name: profile.name.clone(), version: profile.version.clone() },

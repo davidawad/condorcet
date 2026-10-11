@@ -107,7 +107,10 @@ fn parse_scope(a: &Args) -> R {
 
 /// The bundle a command works on: `--bundle <file | bundle:s256:..>`, or
 /// `--adapter A --scope J`. Returns the bundle, the adapter (if any) and the scope.
-fn source(a: &Args) -> Result<(Bundle, Option<Box<dyn FactAdapter>>, Value), Fail> {
+/// A loaded bundle, the adapter that produced it, and the scope used.
+type Source = (Bundle, Option<Box<dyn FactAdapter>>, Value);
+
+fn source(a: &Args) -> Result<Source, Fail> {
     if let Some(b) = a.get("bundle") {
         if b.starts_with("bundle:") {
             return Ok((Store::open(default_root()).get_bundle(b)?, None, json!({})));

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://condorcet.invalid/schemas/profile/v1.json",
+  "name": "gate-default",
+  "version": "1",
+  "steps": [
+    {"composer": "sat-core@1", "on_fail": "stop"},
+    {"composer": "dung@1", "params": {"semantics": "grounded"}},
+    {"composer": "wmc-exact@1", "budget": {"timeout_ms": 8000}},
+    {"composer": "condorcet-jury@1", "role": "baseline"}
+  ],
+  "gates": [
+    {"id": "consistent", "rule": "sat-core.satisfiable == true", "on_fail": "refuse"},
+    {"id": "not-defeated", "rule": "dung.label(staged) != 'out'", "on_fail": "hold"},
+    {"id": "conditional-floor", "rule": "wmc-exact.conditional(load_bearing) >= 0.5", "on_fail": "hold"}
+  ],
+  "seed": 0
+}
