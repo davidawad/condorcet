@@ -1,6 +1,6 @@
 [package]
 name = "condorcet-store"
-description = "condorcet store crate (stub)"
+description = "condorcet store: append-only run log, memo index and bundle cache"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -11,3 +11,4 @@ workspace = true
 
 [dependencies]
 condorcet-core.workspace = true
+serde_json.workspace = true
