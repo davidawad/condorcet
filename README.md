@@ -2,6 +2,14 @@
 
 A fact-composition engine. A fact adapter supplies a **bundle**: claims, the exhibits that bear on them, weighted support, contradict and undercut links, constraints and independence clusters. A **profile** then runs a cascade of declared **composers** over that bundle. The result is an append-only, content-addressed **run** record. The engine contains no domain rules: adapters turn their own rules of evidence into numbers, and the engine composes the numbers.
 
+## Install
+
+Not published to crates.io; install the CLI from git:
+
+```sh
+cargo install --git https://github.com/davidawad/condorcet condorcet-cli
+```
+
 ## Composers (built in)
 
 | id | family | answers |
